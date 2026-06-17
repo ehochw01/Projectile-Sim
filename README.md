@@ -1,5 +1,13 @@
 # EC-327-final-project-projectile
 
+Basic inheritance structure:
+
+Entity (abstract)
+├── PhysicsBody (abstract)
+│   └── Projectile
+└── Target (what Eric will make, inherits from entity)
+
+
 Eric adding some test material
 
 TAREQ
