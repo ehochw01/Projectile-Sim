@@ -1,9 +1,66 @@
 #include "raylib.h" //imports raylib library
 #include "Projectile.h"
+#include <cmath>
+#include "Cannon.h"
 
+//run code, shoot with the R key for now. Will be upon spacebar release when sid adds his part. 
 
+//Hey guys, before main, I've written two helper functions:
+//HELPER FUNCTION 1: FIREBALL: nevermind i deleted this one, a fire function is now in the cannon class.
+//HELPER FUNCTION 2: DRAWWINDHUD: Just draws the wind direction in the top right corner for the user to see before they launch. in main youll see that wind changes every 3 shots. 
+//HELPER FUNCTION 3: DRAWWORLD: This is where I drew the whole scene, the sky, the ground, etc. 
 
-//barebones space design, tomorrow morning I'll code up the physics engine classes. 
+//another helper function to draw the wind arrow for the user BEFORE they take their shot. 
+void DrawWindHUD(Vector3 wind, int screenWidth) {           //wind will be drawn relative to screen width so it doesnt break if we change the window size for different computers
+    Vector2 center = { (float)screenWidth - 80.0f, 90.0f };   // top-right corner
+    float radius = 38.0f;                                      // arrow length
+
+    float speed = sqrtf(wind.x * wind.x + wind.z * wind.z);   // wind magnitude (no y down or up wind)
+
+    //relative to the camera here is how the world looks:
+    // player looks down +X. On their screen:
+    //   world +X (downrange, away) -> screen UP
+    //   world -Z (viewer's right)  -> screen RIGHT
+    float dirX = wind.z;   // screen x-component for wind
+    float dirY = wind.x;   // screen y-component for wind
+
+    DrawCircleLines((int)center.x, (int)center.y, radius + 10, GRAY);   // dial ring, DrawCircleLines built into Raylib is great!
+    DrawText("WIND", (int)center.x - 20, (int)center.y - radius - 34, 16, BLACK);
+
+    if (speed > 0.01f) {                                       // only draw arrow if there's wind, could randomly generate zero wind!
+        float len = sqrtf(dirX * dirX + dirY * dirY);
+        dirX /= len;  dirY /= len;                             // normalize to unit direction
+
+        Vector2 tip  = { center.x + dirX * radius, center.y + dirY * radius };  //get the two points drawn up then join em
+        Vector2 tail = { center.x - dirX * radius, center.y - dirY * radius };
+        DrawLineEx(tail, tip, 4.0f, RED);                      // shaft
+
+        // arrowhead: a triangle at the tip, super annoying to draw
+        float perpX = -dirY, perpY = dirX;                     // perpendicular to direction,def variables 
+        Vector2 base = { center.x + dirX * (radius - 12), center.y + dirY * (radius - 12) };
+        Vector2 left  = { base.x + perpX * 9, base.y + perpY * 9 };
+        Vector2 right = { base.x - perpX * 9, base.y - perpY * 9 };
+        DrawTriangle(tip, right, left, RED);
+    }
+
+    DrawText(TextFormat("%.1f m/s", speed), (int)center.x - 30, (int)center.y + radius + 14, 18, BLACK);
+}
+//Helper function 3, drawworld, self explanatory
+void DrawWorld() {
+    // ground plane: a big flat green field at y=0, like grass! 
+    DrawPlane({0.0f, 0.0f, 0.0f}, {1000.0f, 1000.0f}, (Color){ 76, 124, 60, 255 });
+
+    // subtle grid on top of the grass, like a marked field of some sort
+    DrawGrid(200, 5.0f);   // reads as field markings
+
+    // range markers: low posts every 25m downrange (+X), in pairs 
+    for (int dist = 25; dist <= 200; dist += 25) {
+        float x = (float)dist;
+        // a pair of posts, one on each side of the firing lane,
+        DrawCube({ x, 1.0f,  12.0f }, 0.4f, 2.0f, 0.4f, (Color){ 200, 200, 200, 255 });
+        DrawCube({ x, 1.0f, -12.0f }, 0.4f, 2.0f, 0.4f, (Color){ 200, 200, 200, 255 });
+    }
+}
 
 int main() {
 
@@ -26,41 +83,56 @@ int main() {
 
     //before our while loop, lets setup up a ball, angle and initial velocity. 
 
+    Cannon cannon;   //owns aim + power, Sid's input writes to this. fires the ball along the barrel
     Projectile ball;
-    ball.position = {0.0f, 1.0f, 0.0f};   //begin just above the ground
-    ball.velocity = {8.0f, 8.0f, 0.0f}; //initial velocity vector is 45 degrees
+    ball.position = cannon.pivot; //cannon ball is in the barrel!
+    ball.active = false; //dormant ball, not simulated until fired
 
 
 
-    //this is our mainloop, 
-
+   
+    ball.GenerateWind(); //generate wind for the first 6 shots
+    int shotsSinceWind = 0; //counts shots fired under current wind. Wind changes every 6 shots.
+ //this is our mainloop, 
     while (!WindowShouldClose()) {    //will be true until we hit escape key, only way to end the sim!
         float dt = GetFrameTime(); //seconds since last frame, in our case 1/60 secs, then uses this to feed the physics engine
 
-        ball.Update(dt);  //the physics happens outside drawing
+
+        if (IsKeyPressed(KEY_R)) {
+            cannon.Fire(ball);   // re-fire with new wind (R key)
+            ball.active = true;  //ball is activated
+            shotsSinceWind++;
+            if (shotsSinceWind >= 3) { //as soon as we hit 6 shots
+                ball.GenerateWind();   //regenerate wind
+                shotsSinceWind = 0; // and reset the counter!
+            }
+        }
+
+        if (ball.active) ball.Update(dt);   // only simulate a ball that's in flight
 
 
         BeginDrawing();
-            ClearBackground(RAYWHITE);  //basic white background
+            ClearBackground((Color){ 135, 206, 235, 255 });  //sky blue in RBG values
             
             BeginMode3D(camera);           //enter 3D space from view of camera defined above 
-                DrawGrid(1000,1.0f);         //1000x1000 grid, 1 meter cells, appears to be infinite plane
+                DrawWorld();       //uses helper function above to draw the world as defined.
+
+                cannon.Draw();   //draw the cannon at the origin, barrel points along the current aim
 
                 ball.Draw(); //draw the ball at its current location, everytime this is hit in each loop, it uses the new updated ball position as derived by the math in the physicsbody source code.
 
                 DrawSphere({0,0,0}, 0.3f, RED);  //small sphere to mark the center of the grid.
             EndMode3D(); //no longer drawing in the 3d world after this, but on the flat 2d screen
 
-            DrawText("Projectile Sim, Basic Setup for the Boys", 10,10,20,DARKGRAY);  //text, 10, 10 = x y position from left and top edge
-                                                                                     // 20 = font size 
-                                                                                     // DARKGRAY = color
+            DrawText("Projectile Sim, Posts every 25 meters", 10,10,20,DARKGRAY);  //text, 10, 10 = x y position from left and top edge
+                                                                                      // // DARKGRAY = color
                                                                                      // Eric this is where the "Target Hit!" text would be.
+            
+            DrawWindHUD(ball.windAcceleration, screen_width);   // wind indicator, top-right                                                                         // 20 = font size 
+                                                                                     
 
         EndDrawing();  //pushes frame to screen 
     } //closes the while loop
 CloseWindow();
 return 0;
 }
-
-
-
