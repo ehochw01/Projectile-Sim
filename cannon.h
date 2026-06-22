@@ -18,8 +18,6 @@ public:
     void incrElevation(float frameTime);
     void decrElevations(float frameTime);
     void incrLaunchSpeed(float frameTime);
-    void decrLaunchSpeed(float frameTime); 
-    void incr          
     void Draw() const;                  // draws base + barrel along current aim
     void Fire(Projectile& ball) const;  // launches ball along aim at power
 

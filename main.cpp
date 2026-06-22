@@ -62,6 +62,24 @@ void DrawWorld() {
     }
 }
 
+// another helper function to draw the power charge bar. Bottom-center, fills red as power climbs 0...100
+void DrawPowerBar(float power, int screenWidth, int screenHeight) {
+    int barWidth  = 300;
+    int barHeight = 24;
+    int x = screenWidth / 2 - barWidth / 2;     // centered horizontally
+    int y = screenHeight - 60;                   // near the bottom
+
+    float fraction = power / 100.0f;             // 0.0 to 1.0
+    int fillWidth = (int)(barWidth * fraction);  // how much of the bar is filled (how long the second red rectangle is)
+
+    DrawRectangle(x, y, barWidth, barHeight, (Color){ 40, 40, 40, 200 });   // dark background
+    DrawRectangle(x, y, fillWidth, barHeight, RED);                          // red fill
+    DrawRectangleLines(x, y, barWidth, barHeight, BLACK);                    // border
+    DrawText("POWER", x, y - 22, 18, BLACK);                                 // label
+}
+
+
+
 int main() {
 
     //these lines setup our window, most of these are raylib functions
@@ -95,22 +113,29 @@ int main() {
     while (!WindowShouldClose()) {    //will be true until we hit escape key, only way to end the sim!
         float fTime = GetFrameTime(); //seconds since last frame, in our case 1/60 secs, then uses this to feed the physics engine
 
+        // TEMP dev-only aim test — REMOVE before merge (Sid owns the arrows)
+        if (IsKeyDown(KEY_LEFT))  cannon.decrAzimuth(fTime);
+        if (IsKeyDown(KEY_RIGHT)) cannon.incrAzimuth(fTime);
+        if (IsKeyDown(KEY_UP))    cannon.incrElevation(fTime);
+        if (IsKeyDown(KEY_DOWN))  cannon.decrElevations(fTime);
 
-        if (IsKeyPressed(KEY_R)) {
-            cannon.Fire(ball);   // re-fire with new wind (R key)
-            ball.active = true;  //ball is activated
-            shotsSinceWind++;
-            if (shotsSinceWind >= 3) { //as soon as we hit 6 shots
-                ball.GenerateWind();   //regenerate wind
-                shotsSinceWind = 0; // and reset the counter!
-            }
+        // charge while holding space
+        if (IsKeyDown(KEY_SPACE)) {
+            cannon.incrLaunchSpeed(fTime);
         }
- //   TEMP dev-only aim test so I can swing the barrel myself — REMOVE before merge (Sid owns the arrows)
-         if (IsKeyDown(KEY_LEFT))  cannon.azimuth   -= 60.0f *fTime;
-         if (IsKeyDown(KEY_RIGHT)) cannon.azimuth   += 60.0f *fTime;
-         if (IsKeyDown(KEY_UP))    cannon.elevation += 60.0f *fTime;
-         if (IsKeyDown(KEY_DOWN))  cannon.elevation -= 60.0f *fTime;
-        if (ball.active) ball.Update(dt);   // only simulate a ball that's in flight
+
+        // fire on release
+        if (IsKeyReleased(KEY_SPACE)) {
+            cannon.Fire(ball);
+            ball.active = true;
+
+            shotsSinceWind++;
+            if (shotsSinceWind >= 6) { ball.GenerateWind(); shotsSinceWind = 0; }
+
+            cannon.power = 0.0f;
+        }
+
+        if (ball.active) ball.Update(dt);   // only simulate a ball in flight
 
 
         BeginDrawing();
@@ -126,12 +151,15 @@ int main() {
                 DrawSphere({0,0,0}, 0.3f, RED);  //small sphere to mark the center of the grid.
             EndMode3D(); //no longer drawing in the 3d world after this, but on the flat 2d screen
 
+            
+
             DrawText("Projectile Sim, Posts every 25 meters", 10,10,20,DARKGRAY);  //text, 10, 10 = x y position from left and top edge
                                                                                       // // DARKGRAY = color
                                                                                      // Eric this is where the "Target Hit!" text would be.
             
             DrawWindHUD(ball.windAcceleration, screen_width);   // wind indicator, top-right                                                                         // 20 = font size 
-                                                                                     
+            DrawPowerBar(cannon.power, screen_width, screen_height);   // <-- add this
+                                                                        
 
         EndDrawing();  //pushes frame to screen 
     } //closes the while loop
