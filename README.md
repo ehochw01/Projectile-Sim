@@ -8,7 +8,7 @@ First install raylib:
 
 To compile and run:
 
-```g++ main.cpp PhysicsBody.cpp Projectile.cpp Cannon.cpp -o sim -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib -framework OpenGL -framework Cocoa -framework IOKit && ./sim```
+```make && ./sim```
 
 ## How to play
 

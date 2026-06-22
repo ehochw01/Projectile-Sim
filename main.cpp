@@ -118,7 +118,6 @@ int main() {
         if (IsKeyDown(KEY_RIGHT)) cannon.incrAzimuth(fTime);
         if (IsKeyDown(KEY_UP))    cannon.incrElevation(fTime);
         if (IsKeyDown(KEY_DOWN))  cannon.decrElevation(fTime);
-
         // charge while holding space
         if (IsKeyDown(KEY_SPACE)) {
             cannon.incrLaunchSpeed(fTime);
