@@ -1,13 +1,9 @@
 #include "Cannon.h"
 #include "raylib.h"
 #include <cmath>   // cosf, sinf
+#include "Constants.h"
 
-const float AMAX = 90;
-const float AMIN = -90;
-const float EMAX = 85;
-const float EMIN = 0;
-const float PMAX = 100;
-const float PMIN = 0;
+using namespace Constants;
 
 Vector3 Cannon::getPivot() const {
     return pivot;
@@ -55,7 +51,7 @@ void Cannon::decrElevation(float frameTime) {
 void Cannon::incrLaunchSpeed(float frameTime) {
     float temp = _launchSpeed;
     temp += 60.0f *frameTime;
-    if (temp >= EMIN && temp <= EMAX) {
+    if (temp >= PMIN && temp <= PMAX) {
         _launchSpeed = temp;
     }
 }
