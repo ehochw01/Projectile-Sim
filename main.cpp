@@ -24,11 +24,11 @@ int main() {
     camera.fovy = 60.0f;   //fovy means field of view, in degrees
     camera.projection = CAMERA_PERSPECTIVE; //makes distant thibngs shrink, parallel lines ocnverge toward horizon, same as our eyes. other views available.
 
-    //before our while loop, lets setup up a ball 
+    //before our while loop, lets setup up a ball, angle and initial velocity. 
 
     Projectile ball;
     ball.position = {0.0f, 1.0f, 0.0f};   //begin just above the ground
-    ball.velocity = {15.0f, 15.0f, 0.0f}; //initial velocity vector is 45 degrees
+    ball.velocity = {8.0f, 8.0f, 0.0f}; //initial velocity vector is 45 degrees
 
 
 
@@ -37,7 +37,7 @@ int main() {
     while (!WindowShouldClose()) {    //will be true until we hit escape key, only way to end the sim!
         float dt = GetFrameTime(); //seconds since last frame, in our case 1/60 secs, then uses this to feed the physics engine
 
-        ball.Update(dt);  //happens outside drawing
+        ball.Update(dt);  //the physics happens outside drawing
 
 
         BeginDrawing();
@@ -45,7 +45,9 @@ int main() {
             
             BeginMode3D(camera);           //enter 3D space from view of camera defined above 
                 DrawGrid(1000,1.0f);         //1000x1000 grid, 1 meter cells, appears to be infinite plane
-                ball.Draw(); //draw the ball at its current location
+
+                ball.Draw(); //draw the ball at its current location, everytime this is hit in each loop, it uses the new updated ball position as derived by the math in the physicsbody source code.
+
                 DrawSphere({0,0,0}, 0.3f, RED);  //small sphere to mark the center of the grid.
             EndMode3D(); //no longer drawing in the 3d world after this, but on the flat 2d screen
 
