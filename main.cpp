@@ -131,7 +131,7 @@ int main() {
             ball.active = true;
 
             shotsSinceWind++;
-            if (shotsSinceWind >= 6) { ball.GenerateWind(); shotsSinceWind = 0; }
+            if (shotsSinceWind >= 3) { ball.GenerateWind(); shotsSinceWind = 0; }
 
             cannon.power = 0.0f;
         }
