@@ -1,6 +1,6 @@
 # Cannon Ball
 
-### How to install
+## How to install
 
 First install raylib: 
 
@@ -10,7 +10,7 @@ To compile and run:
 
 ```g++ main.cpp PhysicsBody.cpp Projectile.cpp Cannon.cpp -o sim -I/opt/homebrew/include -L/opt/homebrew/lib -lraylib -framework OpenGL -framework Cocoa -framework IOKit && ./sim```
 
-### How to play:
+## How to play
 
 Use your computer arrow keys (UP, DOWN, LEFT, RIGHT) to change the aim direction of the cannon.
 
@@ -20,7 +20,7 @@ Aim for the targets on the screen. The more centered on the target you hit, the 
 
 Make sure to consider wind when aiming your shot. 
 
-### Inheritance structure of classes
+## Inheritance structure of classes
 
 The root class is ```Entity``` which has a position.
 It also has a ```virtual``` destructor method.

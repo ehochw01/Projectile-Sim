@@ -1,11 +1,12 @@
 #include "PhysicsBody.h"
-
+#include "Constants.h"
 #include <cmath>
 
-void PhysicsBody::Update(float dt) {
-    const float gravity = -9.81f; //m/s2, pulling down along -y. can change to see how projectiles will move on other planets
+using namespace Constants;
 
-    velocity.y += gravity * dt;     //gravity accelerates velocity downwards, changing it every dt
+void PhysicsBody::Update(float dt) {
+
+    velocity.y += GRAVITY * dt;     //gravity accelerates velocity downwards, changing it every dt
     //Wind effect on velocity in x and z directions
     velocity.x += windAcceleration.x * dt; //wind pushing sideways (x)
     velocity.z += windAcceleration.z * dt; //wind pushing sideways (z)
