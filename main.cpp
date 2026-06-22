@@ -117,7 +117,7 @@ int main() {
         if (IsKeyDown(KEY_LEFT))  cannon.decrAzimuth(fTime);
         if (IsKeyDown(KEY_RIGHT)) cannon.incrAzimuth(fTime);
         if (IsKeyDown(KEY_UP))    cannon.incrElevation(fTime);
-        if (IsKeyDown(KEY_DOWN))  cannon.decrElevations(fTime);
+        if (IsKeyDown(KEY_DOWN))  cannon.decrElevation(fTime);
 
         // charge while holding space
         if (IsKeyDown(KEY_SPACE)) {
@@ -131,11 +131,9 @@ int main() {
 
             shotsSinceWind++;
             if (shotsSinceWind >= 6) { ball.GenerateWind(); shotsSinceWind = 0; }
-
-            cannon.power = 0.0f;
         }
 
-        if (ball.active) ball.Update(dt);   // only simulate a ball in flight
+        if (ball.active) ball.Update(fTime);   // only simulate a ball in flight
 
 
         BeginDrawing();
@@ -158,7 +156,7 @@ int main() {
                                                                                      // Eric this is where the "Target Hit!" text would be.
             
             DrawWindHUD(ball.windAcceleration, screen_width);   // wind indicator, top-right                                                                         // 20 = font size 
-            DrawPowerBar(cannon.power, screen_width, screen_height);   // <-- add this
+            DrawPowerBar(cannon.getLaunchSpeed(), screen_width, screen_height);   // <-- add this
                                                                         
 
         EndDrawing();  //pushes frame to screen 

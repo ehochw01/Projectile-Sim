@@ -13,8 +13,12 @@ Vector3 Cannon::getPivot() const {
     return pivot;
 }
 
+float Cannon::getLaunchSpeed() const {
+    return _launchSpeed;
+}
+
 // left/right, degrees, range -90 to 90
-void incrAzimuth(float frameTime) {
+void Cannon::incrAzimuth(float frameTime) {
     float temp = _azimuth;
     temp += 60.0f *frameTime;
     if (temp >= AMIN && temp <= AMAX) {
@@ -23,7 +27,7 @@ void incrAzimuth(float frameTime) {
 }
 
 // left/right, degrees, range -90 to 90
-void decrAzimuth(float frameTime) {
+void Cannon::decrAzimuth(float frameTime) {
     float temp = _azimuth;
     temp -= 60.0f *frameTime;
     if (temp >= AMIN && temp <= AMAX) {
@@ -32,7 +36,7 @@ void decrAzimuth(float frameTime) {
 }
 
 // up/down, degrees, range 0 to 85
-void incrElevation(float frameTime) {
+void Cannon::incrElevation(float frameTime) {
     float temp = _elevation;
     temp += 60.0f *frameTime;
     if (temp >= EMIN && temp <= EMAX) {
@@ -40,7 +44,7 @@ void incrElevation(float frameTime) {
     }
 }
 
-void decrElevation(float frameTime) {
+void Cannon::decrElevation(float frameTime) {
     float temp = _elevation;
     temp -= 60.0f *frameTime;
     if (temp >= EMIN && temp <= EMAX) {
@@ -48,25 +52,17 @@ void decrElevation(float frameTime) {
     }
 }
 
-void incrElevation(float frameTime) {
-    float temp = _lauchSpeed;
+void Cannon::incrLaunchSpeed(float frameTime) {
+    float temp = _launchSpeed;
     temp += 60.0f *frameTime;
     if (temp >= EMIN && temp <= EMAX) {
-        _lauchSpeed = temp;
+        _launchSpeed = temp;
     }
-}
-
-// launch speed m/s, range 0 to 100 (spacebar hold)
-void setPower(float p) {
-    if (p < 0 or p > 100) {
-        return;
-    }
-    __lauchSpeed  = p;
 }
 
 Vector3 Cannon::AimDirection() const {
-    float az = azimuth   * DEG2RAD;
-    float el = elevation * DEG2RAD;
+    float az = _azimuth   * DEG2RAD;
+    float el = _elevation * DEG2RAD;
 
     return {
         cosf(el) * cosf(az),   // X: downrange
@@ -90,11 +86,13 @@ void Cannon::Draw() const {
     DrawCylinderEx(pivot, barrelEnd, 0.35f, 0.28f, 12, (Color){ 40, 40, 45, 255 }); //use drawcylinder from raylib, connect the 2 points
 }
 
-void Cannon::Fire(Projectile& ball) const {
+void Cannon::Fire(Projectile& ball) {
     Vector3 dir = AimDirection();
 
     ball.position = pivot;
-    // aim direction * _lauchSpeed 
-    ball.velocity = { dir.x * _lauchSpeed, dir.y * _lauchSpeed, dir.z * _lauchSpeed };   /
+    // aim direction * _launchSpeed 
+    ball.velocity = { dir.x * _launchSpeed, dir.y * _launchSpeed, dir.z * _launchSpeed };
+
+    _launchSpeed = 0.0f;
 }
 
