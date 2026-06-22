@@ -103,26 +103,25 @@ int main() {
 
     Cannon cannon;   //owns aim + power, Sid's input writes to this. fires the ball along the barrel
     Projectile ball;
-    ball.position = cannon.pivot; //cannon ball is in the barrel!
+    ball.position = cannon.getPivot(); //cannon ball is in the barrel!
     ball.active = false; //dormant ball, not simulated until fired
 
    
     ball.GenerateWind(); //generate wind for the first 6 shots
     int shotsSinceWind = 0; //counts shots fired under current wind. Wind changes every 6 shots.
  //this is our mainloop, 
- while (!WindowShouldClose()) {
-        float dt = GetFrameTime();
+    while (!WindowShouldClose()) {    //will be true until we hit escape key, only way to end the sim!
+        float fTime = GetFrameTime(); //seconds since last frame, in our case 1/60 secs, then uses this to feed the physics engine
 
         // TEMP dev-only aim test — REMOVE before merge (Sid owns the arrows)
-        if (IsKeyDown(KEY_LEFT))  cannon.azimuth   -= 60.0f * dt;
-        if (IsKeyDown(KEY_RIGHT)) cannon.azimuth   += 60.0f * dt;
-        if (IsKeyDown(KEY_UP))    cannon.elevation += 60.0f * dt;
-        if (IsKeyDown(KEY_DOWN))  cannon.elevation -= 60.0f * dt;
+        if (IsKeyDown(KEY_LEFT))  cannon.decrAzimuth(fTime);
+        if (IsKeyDown(KEY_RIGHT)) cannon.incrAzimuth(fTime);
+        if (IsKeyDown(KEY_UP))    cannon.incrElevation(fTime);
+        if (IsKeyDown(KEY_DOWN))  cannon.decrElevation(fTime);
 
         // charge while holding space
         if (IsKeyDown(KEY_SPACE)) {
-            cannon.power += 60.0f * dt;
-            if (cannon.power > 100.0f) cannon.power = 100.0f;
+            cannon.incrLaunchSpeed(fTime);
         }
 
         // fire on release
@@ -132,11 +131,9 @@ int main() {
 
             shotsSinceWind++;
             if (shotsSinceWind >= 6) { ball.GenerateWind(); shotsSinceWind = 0; }
-
-            cannon.power = 0.0f;
         }
 
-        if (ball.active) ball.Update(dt);   // only simulate a ball in flight
+        if (ball.active) ball.Update(fTime);   // only simulate a ball in flight
 
 
         BeginDrawing();
@@ -159,7 +156,7 @@ int main() {
                                                                                      // Eric this is where the "Target Hit!" text would be.
             
             DrawWindHUD(ball.windAcceleration, screen_width);   // wind indicator, top-right                                                                         // 20 = font size 
-            DrawPowerBar(cannon.power, screen_width, screen_height);   // <-- add this
+            DrawPowerBar(cannon.getLaunchSpeed(), screen_width, screen_height);   // <-- add this
                                                                         
 
         EndDrawing();  //pushes frame to screen 

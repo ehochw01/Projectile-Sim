@@ -11,13 +11,21 @@
 
 class Cannon {
 public:
-    float azimuth   = 0.0f;   // Sid: left/right, degrees, range -90 to 90
-    float elevation = 30.0f;  // Sid: up/down, degrees, range 0 to 85
-    float power     = 0.0f;  // Sid: launch speed m/s, range 0 to 100 (spacebar hold)
-
-    Vector3 pivot   = {0.0f, 1.0f, 0.0f};   // barrel hinge + launch point
-
     Vector3 AimDirection() const;       // (azimuth, elevation) -> unit direction vector
+    Vector3 getPivot() const;
+    float getLaunchSpeed() const;
+    void incrAzimuth(float frameTime);    
+    void decrAzimuth(float frameTime);
+    void incrElevation(float frameTime);
+    void decrElevation(float frameTime);
+    void incrLaunchSpeed(float frameTime);
     void Draw() const;                  // draws base + barrel along current aim
-    void Fire(Projectile& ball) const;  // launches ball along aim at power
+    void Fire(Projectile& ball);  // launches ball along aim at power
+
+
+private:
+    Vector3 pivot   = {0.0f, 1.0f, 0.0f};   // barrel hinge + launch point
+    float _azimuth   = 0.0f;        // left/right, degrees, range -90 to 90
+    float _elevation = 30.0f;       // up/down, degrees, range 0 to 85
+    float _launchSpeed     = 20.0f;       // launch speed m/s, range 0 to 100 (spacebar hold)
 };
