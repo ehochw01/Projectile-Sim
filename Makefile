@@ -2,7 +2,7 @@ CXX = g++
 CXXFLAGS = -std=c++20 -I/opt/homebrew/include
 LDFLAGS = -L/opt/homebrew/lib -lraylib -framework OpenGL -framework Cocoa -framework IOKit
 
-SRCS = main.cpp PhysicsBody.cpp Projectile.cpp Cannon.cpp
+SRCS = main.cpp PhysicsBody.cpp Projectile.cpp Cannon.cpp Target.cpp
 OBJS = $(SRCS:.cpp=.o)
 TARGET = sim
 
