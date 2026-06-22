@@ -8,18 +8,6 @@ Entity (abstract)
 └── Target (what Eric will make, inherits from entity)
 
 
-Eric adding some test material
-
-TAREQ
-Sid
-
-Projectile sim:
-
-Golf? Football?
-
-
-
-
 UI - Sid
 	Check raylib ui things
 
