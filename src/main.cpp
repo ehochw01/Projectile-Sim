@@ -4,6 +4,8 @@
 #include "Cannon.h"
 #include "Target.h"
 #include "Constants.h"
+#include "Debris.h"
+#include <vector> //we will store debris objects in a vector
 
 
 
@@ -114,7 +116,25 @@ void DrawPowerBar(float power, int screenWidth, int screenHeight) {
     DrawText("POWER", x, y - 22, 18, BLACK);                                 // label
 }
 
-
+//helper function to spawn debris, takes in a vector of debris objects and shoots them out from some chosen position, to be determined by the location of a target and activated only when struck
+void spawnDebris(std::vector<Debris>& debris, Vector3 origin) { //this function takes a vector of debris objects, and shoots them out from some chosen position, to be determined by the location of a target and activated only when struck
+    int count = 50; //number of debris objects to spawn
+    for (int i = 0; i < count; ++i) {
+        Debris piece;
+        piece.position = origin; //spawn at the given position vector 
+        piece.radius = GetRandomValue(15, 35) / 100.0f;   // radius 0.15..0.35, varied
+        int r = GetRandomValue(130, 255);
+        int g = GetRandomValue(0, 100);
+        int b = GetRandomValue(100, 200);
+        piece.color = (Color){ (unsigned char)r, (unsigned char)g, (unsigned char)b, 255 }; //casts the ints tha random generates and unsigned char (0-255
+        piece.velocity = {
+            GetRandomValue(-100,100) / 10.0f, //random x velocity between -6 and 6 m/s, division is because random number gen doesnt give floats
+            GetRandomValue(100,150) / 10.0f, //random y velocity between 2 and 8, positive so it "erupts" upwards, recent change to make it more satisfying
+            GetRandomValue(-100,100) / 10.0f  //random z velocity between -6 and 6 m/s, outward
+        };
+        debris.push_back(piece); // didn't have this at first and it didnt work, this is what adds the finished fragment to the original vector
+    }
+}
 
 int main() {
 
@@ -144,15 +164,20 @@ int main() {
 
     Target target; //target is a sphere, will be drawn at a random location in the world.
     target.position = { 50.0f, 15.0f, 0.0f }; //target is at 50m downrange, on the ground, radius is 0.5m so y=0.5 to sit on the ground
-
    
     ball.GenerateWind(); //generate wind for the first 6 shots
     int shotsSinceWind = 0; //counts shots fired under current wind. Wind changes every 6 shots.
+
+    std::vector<Debris> debris; //vector to hold debris objects, will be filled when target is hit
  //this is our mainloop, 
     while (!WindowShouldClose()) {    //will be true until we hit escape key, only way to end the sim!
         float fTime = GetFrameTime(); //seconds since last frame, in our case 1/60 secs, then uses this to feed the physics engine
 
-        // TEMP dev-only aim test — REMOVE before merge (Sid owns the arrows)
+        // INPUT 
+
+        //for now, spawn debris is called at this position as a test, eventually will be called at the location of struck targets.
+        if (IsKeyPressed(KEY_D)) spawnDebris(debris, {20.0f, 5.0f, 0.0f});   // TEST: erupt debris
+
         if (IsKeyDown(KEY_LEFT))  cannon.decrAzimuth(fTime);
         if (IsKeyDown(KEY_RIGHT)) cannon.incrAzimuth(fTime);
         if (IsKeyDown(KEY_UP))    cannon.incrElevation(fTime);
@@ -173,7 +198,9 @@ int main() {
         }
 
         if (ball.active) ball.Update(fTime);   // only simulate a ball in flight
-
+        for (Debris& piece : debris) {
+            piece.Update(fTime);   // gravity + bounce, all inherited
+        }
 
         BeginDrawing();
             ClearBackground((Color){ 135, 206, 235, 255 });  //sky blue in RBG values
@@ -185,6 +212,8 @@ int main() {
 
                 ball.Draw(); //draw the ball at its current location, everytime this is hit in each loop, it uses the new updated ball position as derived by the math in the physicsbody source code.
                 target.Draw(); //draw the target at its location, currently static but we could make it move later if we wanted.
+                for (Debris& piece : debris) piece.Draw();   // all fragments, must be by reference! early mistake
+
                 DrawSphere({0,0,0}, 0.3f, RED);  //small sphere to mark the center of the grid.
             EndMode3D(); //no longer drawing in the 3d world after this, but on the flat 2d screen
 

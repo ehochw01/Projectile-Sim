@@ -19,8 +19,8 @@ void PhysicsBody::Update(float dt) {
     position.z += velocity.z * dt; 
 
     //the loop below is what prevents it from going through the floor, so it bounces
-    if (position.y < 0.0f) {
-        position.y = 0.0f;
+    if (position.y < 1.0f) {
+        position.y = 1.0f;
         velocity.y = -velocity.y * 0.7f; //reverse vertical velocity, keep 70%, lose 30% to the bounce
     }
 
