@@ -5,12 +5,15 @@ LDFLAGS = -L/opt/homebrew/lib -lraylib -framework OpenGL -framework Cocoa -frame
 SRCDIR = src
 SRCS = $(SRCDIR)/main.cpp $(SRCDIR)/PhysicsBody.cpp $(SRCDIR)/Projectile.cpp $(SRCDIR)/Cannon.cpp $(SRCDIR)/Target.cpp $(SRCDIR)/Debris.cpp
 OBJS = $(SRCS:.cpp=.o)
+HEADERS = $(wildcard include/*.h)
 TARGET = sim
 
 $(TARGET): $(OBJS)
 	$(CXX) $(OBJS) -o $(TARGET) $(LDFLAGS)
 
-$(SRCDIR)/%.o: $(SRCDIR)/%.cpp
+# headers are listed as a prerequisite so editing a .h (e.g. a Constants.h value)
+# forces every .o to recompile, not just the .cpp that happens to be newer
+$(SRCDIR)/%.o: $(SRCDIR)/%.cpp $(HEADERS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:

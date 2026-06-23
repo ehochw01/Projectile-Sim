@@ -19,7 +19,6 @@ void DrawWindHUD(Vector3 wind, int screenWidth) {
     // wind magnitude (no y down or up wind)
     float windSpeed = sqrtf(wind.x * wind.x + wind.z * wind.z);   
 
-    // relative to the camera here is how the world looks:
     // player looks down +X. On their screen:
     // world +X (downrange, away) -> screen UP
     // world -Z (viewer's right)  -> screen RIGHT
@@ -47,7 +46,7 @@ void DrawWindHUD(Vector3 wind, int screenWidth) {
         } else { 
             arrowLen = radius;  // fresh breeze (8-10 m/s)
         }
-
+        
         Vector2 tip  = { center.x + dirX * arrowLen, center.y + dirY * arrowLen };  //get the two points drawn up then join em
         Vector2 tail = { center.x - dirX * arrowLen, center.y - dirY * arrowLen };
         DrawLineEx(tail, tip, 4.0f, RED);                      // shaft
@@ -182,8 +181,8 @@ void DrawPowerBar(float power, int screenWidth, int screenHeight) {
     DrawText("POWER", x, y - 22, 18, BLACK);                                 // label
 }
 
-//helper function to spawn debris, takes in a vector of debris objects and shoots them out from some chosen position, to be determined by the location of a target and activated only when struck
-void spawnDebris(std::vector<Debris>& debris, Vector3 origin) { //this function takes a vector of debris objects, and shoots them out from some chosen position, to be determined by the location of a target and activated only when struck
+// helper function to spawn debris, takes in a vector of debris objects and shoots them out from some chosen position, to be determined by the location of a target and activated only when struck
+void spawnDebris(std::vector<Debris>& debris, Vector3 origin) { //this function takes a vector of debris objects, and shoots them out from some chosen position
     int count = 100; //number of debris objects to spawn
     const float debrisSpeed = 3.5f;   // <-- master knob: 1.0 = current, higher = faster debris
     for (int i = 0; i < count; i++) {
@@ -212,51 +211,44 @@ void randomizeTarget(Target& target) {
 }
 
 int main() {
-
-    //these lines setup our window, most of these are raylib functions
     const int screen_width = 1280;   //screen dimensions, const since they shouldn't change
     const int screen_height = 720; 
-    SetConfigFlags(FLAG_WINDOW_TOPMOST);  //bug fix, this forces window to the front when it launches
+    SetConfigFlags(FLAG_WINDOW_TOPMOST);  // forces window to the front on launch
     InitWindow(screen_width,screen_height, "Projectile Simulator");
     SetTargetFPS(60); //sets the upper limit of the loop at 60 fps
 
     int turnCount = 0; //keeps track of how many shots have been fired, used to change wind every 3 shots
 
     // sets up the camera, behind the cannon looking fwd
-    //the Camera3D class already exists in raylib, with useful methods
     Camera3D camera = {};
     camera.position = {-10.0f, 2.5f, 0.0f}; //behind the camera (neg x), and above, (pos y), classic video game)
                                             // the reason for the f's is that raylib using a Vector3 struct that takes in float numbers, not doubles. 
     camera.target = {0.0f, 3.0f, 0.0f};  //what its looking at, slightly upward, this func draws line between position and target, to determine our line of sight
     camera.up = {0.0f, 1.0f, 0.0f};     //determines which way is up. 
     camera.fovy = 60.0f;   //fovy means field of view, in degrees
-    camera.projection = CAMERA_PERSPECTIVE; //makes distant thibngs shrink, parallel lines ocnverge toward horizon, same as our eyes. other views available.
+    camera.projection = CAMERA_PERSPECTIVE; //makes distant things shrink, parallel lines converge toward horizon, same as our eyes. other views available.
 
-    //before our while loop, lets setup up a ball, angle and initial velocity. 
-
-    Cannon cannon;   //owns aim + power, Sid's input writes to this. fires the ball along the barrel
+    // setup up a ball, angle and initial velocity. 
+    Cannon cannon;   //owns aim + power and fires the ball along the barrel
     Projectile ball;
-    ball.position = cannon.getPivot(); //cannon ball is in the barrel!
+    ball.position = cannon.getPivot(); //cannon ball is in the barrel
     ball.active = false; //dormant ball, not simulated until fired
 
-    Target target; //target is a sphere, will be drawn at a random location in the world.
-    target.position = { 50.0f, 15.0f, 0.0f }; //target is at 50m downrange, on the ground, radius is 0.5m so y=0.5 to sit on the ground
+    Target target; // target is a sphere, will be drawn at a random location in the world.
+    target.position = { 50.0f, 15.0f, 0.0f };
 
-    ball.GenerateWind(); //generate wind for the first 6 shots
+    ball.GenerateWind(); // generate wind for the first 3 shots
 
-    std::vector<Debris> debris; //vector to hold debris objects, will be filled when target is hit
+    std::vector<Debris> debris; // vector to hold debris objects, will be filled when target is hit
 
     bool collision = false; //flag to indicate if the ball has hit the target, initially false
- //this is our mainloop, 
-
     int score = 0; //initialize score to 0, will increment when target is hit
-    while (!WindowShouldClose()) {    //will be true until we hit escape key, only way to end the sim!
-        float fTime = GetFrameTime(); //seconds since last frame, in our case 1/60 secs, then uses this to feed the physics engine
 
-        // INPUT 
+    bool targetVisible = true;          // hidden briefly after a hit while it "respawns" elsewhere
+    float targetRespawnTimer = 0.0f;    // counts down from Constants::TARGET_RESPAWN_DELAY while hidden
 
-        //for now, spawn debris is called at this position as a test, eventually will be called at the location of struck targets.
-        if (IsKeyPressed(KEY_D)) spawnDebris(debris, {20.0f, 5.0f, 0.0f});   // TEST: erupt debris
+    while (!WindowShouldClose()) {    // will be true until we hit escape key 
+        float fTime = GetFrameTime(); // seconds since last frame, in our case 1/60 secs, then uses this to feed the physics engine
 
         if (IsKeyDown(KEY_LEFT))  cannon.decrAzimuth(fTime);
         if (IsKeyDown(KEY_RIGHT)) cannon.incrAzimuth(fTime);
@@ -266,12 +258,10 @@ int main() {
         if (IsKeyDown(KEY_SPACE)) {
             cannon.incrLaunchSpeed(fTime);
         }
-
         // fire on release
         if (IsKeyReleased(KEY_SPACE)) {
             cannon.Fire(ball);
             ball.active = true;
-
             turnCount++;
             if (turnCount % 3 == 0) { ball.GenerateWind(); }
 
@@ -281,7 +271,8 @@ int main() {
         if (ball.active) ball.Update(fTime);   // only simulate a ball in flight
 
         // disk hit test: true only on the frame the ball crosses the target's face (no repeated hits)
-        collision = ball.active && target.CheckHit(prevBallPos, ball.position, ball.radius);
+        // skipped while the target is hidden/respawning so the ball can't hit something that isn't there
+        collision = targetVisible && ball.active && target.CheckHit(prevBallPos, ball.position, ball.radius);
 
         for (Debris& piece : debris) {
             piece.Update(fTime);   // gravity + bounce, all inherited
@@ -290,8 +281,18 @@ int main() {
         if (collision) {
             spawnDebris(debris, ball.position); //spawn debris where the ball actually struck the disk
             collision = false; //reset collision flag to avoid repeated spawning
-            randomizeTarget(target); //move the target to a new random location
+            targetVisible = false;                                   // target "explodes" and disappears on impact
+            targetRespawnTimer = Constants::TARGET_RESPAWN_DELAY;     // ...and stays gone for a short pause
             score++; //increment score when target is hit
+        }
+
+        // once the pause elapses, move the target and bring it back
+        if (!targetVisible) {
+            targetRespawnTimer -= fTime;
+            if (targetRespawnTimer <= 0.0f) {
+                randomizeTarget(target);
+                targetVisible = true;
+            }
         }
 
         BeginDrawing();
@@ -303,7 +304,7 @@ int main() {
                 cannon.Draw();   //draw the cannon at the origin, barrel points along the current aim
 
                 ball.Draw(); //draw the ball at its current location, everytime this is hit in each loop, it uses the new updated ball position as derived by the math in the physicsbody source code.
-                target.Draw(); //draw the target at its location, currently static but we could make it move later if we wanted.
+                if (targetVisible) target.Draw(); //draw the target at its location, hidden during the brief respawn pause
                 for (Debris& piece : debris) piece.Draw();   // all fragments, must be by reference! early mistake
 
                 DrawSphere({0,0,0}, 0.3f, RED);  //small sphere to mark the center of the grid.

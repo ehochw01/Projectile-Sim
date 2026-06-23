@@ -9,4 +9,6 @@ namespace Constants {
     inline constexpr float PMAX = 100;
     inline constexpr float PMIN = 0;
     inline constexpr float GRAVITY = -9.81;
+    inline constexpr int MAX_DEBRIS = 300;   // cap on total debris pieces alive at once, oldest get dropped past this
+    inline constexpr float TARGET_RESPAWN_DELAY = 1.1f;   // seconds the target stays gone after being hit, before reappearing elsewhere
 }

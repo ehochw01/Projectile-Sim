@@ -11,12 +11,12 @@ void PhysicsBody::Update(float dt) {
     velocity.x += windAcceleration.x * dt; //wind pushing sideways (x)
     velocity.z += windAcceleration.z * dt; //wind pushing sideways (z)
 
-    
-    
+
+
     position.y += velocity.y * dt;  //velocity moves the position, changing it every dt
-    position.x += velocity.x * dt; // both x and z drift at constant speed determined at launch, since no acceleration force is on x or z, only on y. 
+    position.x += velocity.x * dt; // both x and z drift at constant speed determined at launch, since no acceleration force is on x or z, only on y.
                                        // this will change if we decide to add drag later, and will depend on the radius of the ball.
-    position.z += velocity.z * dt; 
+    position.z += velocity.z * dt;
 
     //the loop below is what prevents it from going through the floor, so it bounces
     if (position.y < 1.0f) {
@@ -24,6 +24,10 @@ void PhysicsBody::Update(float dt) {
         velocity.y = -velocity.y * 0.7f; //reverse vertical velocity, keep 70%, lose 30% to the bounce
     }
 
+}
+
+float PhysicsBody::getSpeed() const {
+    return sqrtf(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z); //pythagorean theorem in 3D, gives speed regardless of direction
 }
 
 void PhysicsBody::GenerateWind() {
