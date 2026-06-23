@@ -98,6 +98,72 @@ void DrawWorld() {
         DrawCube({ x, 1.0f,  12.0f }, 0.4f, 2.0f, 0.4f, (Color){ 200, 200, 200, 255 });
         DrawCube({ x, 1.0f, -12.0f }, 0.4f, 2.0f, 0.4f, (Color){ 200, 200, 200, 255 });
     }
+
+        // Background scenery:
+
+    // trees along the edges, well clear of the firing lane
+    Color trunk  = {101, 67, 33, 255};   // brown
+    Color leaves = {34, 139, 34, 255};   // forest green
+    // tree at x=30, z=25 (right side)
+    DrawCylinder({30.0f, 0.0f, 25.0f}, 0.5f, 0.3f, 8.0f, 8, trunk);
+    DrawSphere({30.0f, 9.8f, 25.0f}, 3.0f, leaves);
+    // tree at x=70, z=-30 (left side, tall)
+    DrawCylinder({70.0f, 0.0f, -30.0f}, 0.5f, 0.3f, 10.0f, 8, trunk);
+    DrawSphere({70.0f, 12.4f, -30.0f}, 4.0f, leaves);
+    // tree at x=120, z=28 (right side, shorter)
+    DrawCylinder({120.0f, 0.0f, 28.0f}, 0.5f, 0.3f, 6.0f, 8, trunk);
+    DrawSphere({120.0f, 7.5f, 28.0f}, 2.5f, leaves);
+    // tree at x=45, z=-35 (left side)
+    DrawCylinder({45.0f, 0.0f, -35.0f}, 0.5f, 0.3f, 9.0f, 8, trunk);
+    DrawSphere({45.0f, 11.1f, -35.0f}, 3.5f, leaves);
+    // tree at x=90, z=32 (right side, big)
+    DrawCylinder({90.0f, 0.0f, 32.0f}, 0.6f, 0.3f, 12.0f, 8, trunk);
+    DrawSphere({90.0f, 14.7f, 32.0f}, 4.5f, leaves);
+    // tree at x=160, z=-25 (left side, far)
+    DrawCylinder({160.0f, 0.0f, -25.0f}, 0.5f, 0.3f, 7.0f, 8, trunk);
+    DrawSphere({160.0f, 8.8f, -25.0f}, 3.0f, leaves);
+
+    // boulders scattered off to the sides
+    Color stone = {140, 140, 140, 255};
+    DrawSphere({25.0f,  0.9f,  18.0f}, 1.5f, stone);
+    DrawSphere({80.0f,  1.2f, -20.0f}, 2.0f, stone);
+    DrawSphere({55.0f,  0.6f,  22.0f}, 1.0f, stone);
+    DrawSphere({140.0f, 1.0f, -18.0f}, 1.8f, stone);
+
+    // big yellow sun high in the sky
+    DrawSphere({200.0f, 110.0f, -110.0f}, 20.0f, YELLOW);
+
+    // cloud clusters: groups of overlapping white spheres 
+    Color cloud = {255, 255, 255, 220};
+    DrawSphere({60.0f,  80.0f, -48.0f}, 8.0f, cloud);
+    DrawSphere({65.0f,  80.0f, -43.0f}, 7.0f, cloud);
+    DrawSphere({55.0f,  80.0f, -45.0f}, 6.0f, cloud);
+
+    DrawSphere({120.0f, 70.0f,  45.0f}, 10.0f, cloud);
+    DrawSphere({125.0f, 70.0f,  28.0f}, 8.0f,  cloud);
+    DrawSphere({120.0f, 70.0f,  34.0f}, 7.0f,  cloud);
+
+    DrawSphere({175.0f, 85.0f, -20.0f}, 9.0f, cloud);
+    DrawSphere({185.0f, 80.0f, -16.0f}, 7.0f, cloud);
+
+    // distant mountains: upside down cones behind the firing range 
+    Color mountain = {100, 100, 120, 255};
+    DrawCylinder({300.0f, 0.0f, -190.0f},  0.0f, 60.0f, 80.0f, 6, mountain);
+    DrawCylinder({350.0f, 0.0f, -160.0f},  0.0f, 50.0f, 65.0f, 6, mountain);
+    DrawCylinder({260.0f, 0.0f, -210.0f}, 0.0f, 45.0f, 55.0f, 6, mountain);
+    DrawCylinder({320.0f, 0.0f,  -90.0f},  0.0f, 55.0f, 70.0f, 6, mountain);
+
+
+    // how do i make a night time?
+    // I would want a random time of day at the start(probably outside drawworld)
+    // then inside drawworld, I would check the time of day and draw the sky accordingly
+
+    // daytime with sun top left and clouds(light blue sky)
+    // nighttime with moon and stars(dark blue, no clouds, dotted stars: mostly white, some red some blue and some yellow)
+    // sunset? pink and orange sky, sun low on horizon on the right, maybe some stripey clouds
+
+    // how difficult is a simple moving background? twinkling stars, ruslting trees etc?
+    
 }
 
 // another helper function to draw the power charge bar. Bottom-center, fills red as power climbs 0...100
