@@ -7,7 +7,14 @@
 #include "Debris.h"
 #include <vector> //we will store debris objects in a vector
 
+using Constants::DEBRIS_COLOR_VARIATION;
 
+// keeps a color channel in [0,255] so it's safe to cast to unsigned char without wrapping around
+int ClampColorChannel(int value) {
+    if (value < 0) return 0;
+    if (value > 255) return 255;
+    return value;
+}
 
 //helper function to draw the wind arrow for the user. Wind changes every 3 shots. 
 void DrawWindHUD(Vector3 wind, int screenWidth) {          
@@ -182,17 +189,17 @@ void DrawPowerBar(float power, int screenWidth, int screenHeight) {
 }
 
 // helper function to spawn debris, takes in a vector of debris objects and shoots them out from some chosen position, to be determined by the location of a target and activated only when struck
-void spawnDebris(std::vector<Debris>& debris, Vector3 origin) { //this function takes a vector of debris objects, and shoots them out from some chosen position
+void spawnDebris(std::vector<Debris>& debris, Vector3 origin, Color tColor) { //this function takes a vector of debris objects, and shoots them out from some chosen position
     int count = 100; //number of debris objects to spawn
     const float debrisSpeed = 3.5f;   // <-- master knob: 1.0 = current, higher = faster debris
     for (int i = 0; i < count; i++) {
         Debris piece;
         piece.position = origin; //spawn at the given position vector 
         piece.radius = GetRandomValue(10, 30) / 100.0f;   // radius 0.15..0.35, varied
-        int r = GetRandomValue(130, 255);  //random pink shade
-        int g = GetRandomValue(0, 100);    //random bright shade
-        int b = GetRandomValue(100, 200);  //random bright blue shade
-        piece.color = (Color){ (unsigned char)r, (unsigned char)g, (unsigned char)b, 255 }; //casts the ints tha random generates and unsigned char (0-255
+        int r = GetRandomValue(ClampColorChannel(tColor.r - DEBRIS_COLOR_VARIATION), ClampColorChannel(tColor.r + DEBRIS_COLOR_VARIATION));
+        int g = GetRandomValue(ClampColorChannel(tColor.g - DEBRIS_COLOR_VARIATION), ClampColorChannel(tColor.g + DEBRIS_COLOR_VARIATION));
+        int b = GetRandomValue(ClampColorChannel(tColor.b - DEBRIS_COLOR_VARIATION), ClampColorChannel(tColor.b + DEBRIS_COLOR_VARIATION));
+        piece.color = (Color){ (unsigned char)r, (unsigned char)g, (unsigned char)b, 255 }; //casts the ints that random generates and unsigned char (0-255)
         piece.velocity = {
             debrisSpeed * GetRandomValue(-90, -30) / 10.0f, //random x velocity between -6 and 6 m/s, division is because random number gen doesnt give floats
             GetRandomValue(20,120) / 10.0f, //random y velocity between 2 and 8, positive so it "erupts" upwards, recent change to make it more satisfying
@@ -283,7 +290,7 @@ int main() {
         }
 
         if (collision) {
-            spawnDebris(debris, ball.position); //spawn debris where the ball actually struck the disk
+            spawnDebris(debris, ball.position, target.GetColor()); //spawn debris where the ball actually struck the disk
             collision = false; //reset collision flag to avoid repeated spawning
             targetVisible = false;                                   // target "explodes" and disappears on impact
             targetRespawnTimer = Constants::TARGET_RESPAWN_DELAY;     // ...and stays gone for a short pause

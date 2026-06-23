@@ -10,6 +10,7 @@ class Target : public Entity {
         // so a ball passing through can't register as many collisions in a row.
         bool CheckHit(Vector3 prevBallPos, Vector3 ballPos, float ballRadius) const;
         void RandomizeColor();   // picks a new random color for the target
+        Color GetColor() const { return color; }
         void Shrink();
         float radius{10.0f};    //disk radius in meters, can change
     private:
