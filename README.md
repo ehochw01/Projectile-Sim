@@ -60,6 +60,10 @@ Class ```PhysicsBody``` inherits from entity and implements the update class wit
 
 The ```Projectile``` class implements the draw method of entity. It represents the ball being launched, and uses raylib's ```DrawSphere()``` API method. It takes a position, radius and color. 
 
+The ```Debris``` class also inherits from ```PhysicsBody```, so it reuses the same gravity and bounce physics for free (it only implements ```Draw()```). Debris are the colored fragments that erupt from a target when it is struck.
+
+The ```Target``` class inherits directly from ```Entity``` (it is static, so it does not need ```PhysicsBody```). It is drawn as a flat vertical disk facing the cannon using raylib's ```DrawCylinderEx()``` method. Its ```CheckHit()``` method detects a collision by testing whether the ball crossed the disk's plane within the disk's face on a given frame — this fires exactly once per pass-through, instead of repeatedly while the ball overlaps a solid volume.
+
 Then there is the ```Cannon``` class which does NOT inherit from the ```Entity``` class as it is not subject to gravity or wind for it's movement. Only user input can move the cannon, changing its aim direction. The ```Cannon.Fire()``` method takes a ```Projectile``` object by reference, and then affects it's physics metrics. 
 
 main.cpp contains ```DrawWorld()``` which renders the the game environment appearance. It also contains ```DrawWindHUD()``` which will render the wind compass in the top right corner of the screen for the user to consider when shooting a ball. 
