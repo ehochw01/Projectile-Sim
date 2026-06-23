@@ -5,47 +5,81 @@
 #include "Target.h"
 #include "Constants.h"
 
-//run code, shoot with the R key for now. Will be upon spacebar release when sid adds his part. 
 
-//Hey guys, before main, I've written two helper functions:
-//HELPER FUNCTION 1: FIREBALL: nevermind i deleted this one, a fire function is now in the cannon class.
-//HELPER FUNCTION 2: DRAWWINDHUD: Just draws the wind direction in the top right corner for the user to see before they launch. in main youll see that wind changes every 3 shots. 
-//HELPER FUNCTION 3: DRAWWORLD: This is where I drew the whole scene, the sky, the ground, etc. 
 
 //helper function to draw the wind arrow for the user. Wind changes every 3 shots. 
-void DrawWindHUD(Vector3 wind, int screenWidth) {           //wind will be drawn relative to screen width so it doesnt break if we change the window size for different computers
+void DrawWindHUD(Vector3 wind, int screenWidth) {          
+    //wind will be drawn relative to screen width 
     Vector2 center = { (float)screenWidth - 80.0f, 90.0f };   // top-right corner
-    float radius = 38.0f;                                      // arrow length
+    // arrow length
+    float radius = 38.0f;                                      
 
-    float speed = sqrtf(wind.x * wind.x + wind.z * wind.z);   // wind magnitude (no y down or up wind)
+    // wind magnitude (no y down or up wind)
+    float windSpeed = sqrtf(wind.x * wind.x + wind.z * wind.z);   
 
-    //relative to the camera here is how the world looks:
+    // relative to the camera here is how the world looks:
     // player looks down +X. On their screen:
-    //   world +X (downrange, away) -> screen UP
-    //   world -Z (viewer's right)  -> screen RIGHT
+    // world +X (downrange, away) -> screen UP
+    // world -Z (viewer's right)  -> screen RIGHT
     float dirX = wind.z;   // screen x-component for wind
     float dirY = wind.x;   // screen y-component for wind
 
-    DrawCircleLines((int)center.x, (int)center.y, radius + 10, GRAY);   // dial ring, DrawCircleLines built into Raylib is great!
+    // draws wind dial ring to screen, with a radius slightly larger than the arrow length.
+    DrawCircleLines((int)center.x, (int)center.y, radius + 10, GRAY);   
+
     DrawText("WIND", (int)center.x - 20, (int)center.y - radius - 34, 16, BLACK);
 
-    if (speed > 0.01f) {                                       // only draw arrow if there's wind, could randomly generate zero wind!
+    if (windSpeed > 0.01f) {
         float len = sqrtf(dirX * dirX + dirY * dirY);
         dirX /= len;  dirY /= len;                             // normalize to unit direction
 
-        Vector2 tip  = { center.x + dirX * radius, center.y + dirY * radius };  //get the two points drawn up then join em
-        Vector2 tail = { center.x - dirX * radius, center.y - dirY * radius };
+        // arrow length steps through 4 buckets so speed changes are easy to read at a glance
+        // (wind strength is generated in [0, 10.0] m/s, see PhysicsBody::GenerateWind)
+        float arrowLen;
+        if (windSpeed < 2.0f) {
+            arrowLen = 14.0f;   // calm / light air
+        } else if (windSpeed < 5.0f)  {
+            arrowLen = 22.0f;   // light-to-gentle breeze
+        } else if (windSpeed < 8.0f) { 
+            arrowLen = 30.0f;   // moderate breeze
+        } else { 
+            arrowLen = radius;  // fresh breeze (8-10 m/s)
+        }
+
+        Vector2 tip  = { center.x + dirX * arrowLen, center.y + dirY * arrowLen };  //get the two points drawn up then join em
+        Vector2 tail = { center.x - dirX * arrowLen, center.y - dirY * arrowLen };
         DrawLineEx(tail, tip, 4.0f, RED);                      // shaft
 
-        // arrowhead: a triangle at the tip, super annoying to draw
-        float perpX = -dirY, perpY = dirX;                     // perpendicular to direction,def variables 
-        Vector2 base = { center.x + dirX * (radius - 12), center.y + dirY * (radius - 12) };
+        // arrowhead: a triangle at the tip
+        float perpX = -dirY, perpY = dirX;                     // perpendicular to direction,def variables
+        Vector2 base = { center.x + dirX * fmaxf(arrowLen - 12, 0.0f), center.y + dirY * fmaxf(arrowLen - 12, 0.0f) };
         Vector2 left  = { base.x + perpX * 9, base.y + perpY * 9 };
         Vector2 right = { base.x - perpX * 9, base.y - perpY * 9 };
         DrawTriangle(tip, right, left, RED);
     }
 
-    DrawText(TextFormat("%.1f m/s", speed), (int)center.x - 30, (int)center.y + radius + 14, 18, BLACK);
+    // draw the decimal point as a manual dot since the font's "." glyph
+    // is too small to read at this size; carry the rounding into the whole part
+    int fontSize = 18;
+    int wholePart = (int)windSpeed;
+    int tenths = (int)roundf((windSpeed - wholePart) * 10.0f);
+    if (tenths >= 10) { tenths = 0; wholePart += 1; }
+
+    const char* wholeStr = TextFormat("%d", wholePart);
+    const char* tailStr  = TextFormat("%d m/s", tenths);
+
+    int textX = (int)center.x - 30;
+    int textY = (int)center.y + radius + 14;
+
+    DrawText(wholeStr, textX, textY, fontSize, BLACK);
+    int wholeWidth = MeasureText(wholeStr, fontSize);
+
+    float dotRadius = 2.5f;
+    float dotX = textX + wholeWidth + dotRadius + 2;
+    float dotY = textY + fontSize - dotRadius - 2;   // sits on the text baseline
+    DrawCircle((int)dotX, (int)dotY, dotRadius, BLACK);
+
+    DrawText(tailStr, (int)(dotX + dotRadius + 3), textY, fontSize, BLACK);
 }
 //Helper function, drawworld, self explanatory, it draws the world! 
 void DrawWorld() {

@@ -27,11 +27,13 @@ void PhysicsBody::Update(float dt) {
 }
 
 void PhysicsBody::GenerateWind() {
-    float angle = GetRandomValue(0,359) * DEG2RAD; //random compass direction, GetRandomValue is raylib built in random number generator, cosf, sinf from cmath only work in radians so we confvert.
-    float strength = GetRandomValue(0,40) / 10.0f;
-    windAcceleration.x = cosf(angle) * strength;          // direction -> X component
-    windAcceleration.z = sinf(angle) * strength;          // direction -> Z component
-    windAcceleration.y = 0.0f;   
+    do {
+        float angle = GetRandomValue(0,359) * DEG2RAD; //random compass direction, GetRandomValue is raylib built in random number generator, cosf, sinf from cmath only work in radians so we confvert.
+        float strength = GetRandomValue(0,100) / 10.0f;
+        windAcceleration.x = cosf(angle) * strength;          // direction -> X component
+        windAcceleration.z = sinf(angle) * strength;          // direction -> Z component
+        windAcceleration.y = 0.0f;   
+    } while (windAcceleration.x == 0.0f && windAcceleration.z == 0.0f); //keep generating until we get a non-zero wind vector
 }
 
 
