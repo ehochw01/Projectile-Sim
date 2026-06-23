@@ -157,7 +157,8 @@ int main() {
             
 
             DrawText("Projectile Sim, Posts every 25 meters", 10,10,20,DARKGRAY);  //text, 10, 10 = x y position from left and top edge
-                                                                                      // // DARKGRAY = color
+            DrawText("Use arrow keys to aim, hold space to charge, release to fire", 10, 40, 20, DARKGRAY);
+            DrawText("Score: ", 10, 70, 20, DARKGRAY);                                                                          // // DARKGRAY = color
                                                                                      // Eric this is where the "Target Hit!" text would be.
             
             DrawWindHUD(ball.windAcceleration, screen_width);   // wind indicator, top-right                                                                         // 20 = font size 
