@@ -34,7 +34,7 @@ Use your computer arrow keys (UP, DOWN, LEFT, RIGHT) to change the aim direction
 
 Hold the space bar to begin firing the cannon. The longer you hold the space bar, the more powerful the shot will be. Release the space bar to fire. 
 
-Aim for the targets on the screen. The more centered on the target you hit, the more points you get.
+Aim for the targets on the screen. Each hit scores a point. After being struck, a target briefly disappears before reappearing at a new spot — and every 3rd hit, it also shrinks and changes color, making it progressively harder to hit.
 
 Make sure to consider wind when aiming your shot. 
 
