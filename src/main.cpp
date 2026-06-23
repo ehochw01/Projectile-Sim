@@ -220,6 +220,8 @@ int main() {
     InitWindow(screen_width,screen_height, "Projectile Simulator");
     SetTargetFPS(60); //sets the upper limit of the loop at 60 fps
 
+    int turnCount = 0; //keeps track of how many shots have been fired, used to change wind every 3 shots
+
     // sets up the camera, behind the cannon looking fwd
     //the Camera3D class already exists in raylib, with useful methods
     Camera3D camera = {};
@@ -238,10 +240,9 @@ int main() {
     ball.active = false; //dormant ball, not simulated until fired
 
     Target target; //target is a sphere, will be drawn at a random location in the world.
-    randomizeTarget(target);
-   
+    target.position = { 50.0f, 15.0f, 0.0f }; //target is at 50m downrange, on the ground, radius is 0.5m so y=0.5 to sit on the ground
+
     ball.GenerateWind(); //generate wind for the first 6 shots
-    int shotsSinceWind = 0; //counts shots fired under current wind. Wind changes every 6 shots.
 
     std::vector<Debris> debris; //vector to hold debris objects, will be filled when target is hit
 
@@ -271,8 +272,8 @@ int main() {
             cannon.Fire(ball);
             ball.active = true;
 
-            shotsSinceWind++;
-            if (shotsSinceWind >= 3) { ball.GenerateWind(); shotsSinceWind = 0; }
+            turnCount++;
+            if (turnCount % 3 == 0) { ball.GenerateWind(); }
 
         }
 
@@ -308,11 +309,11 @@ int main() {
                 DrawSphere({0,0,0}, 0.3f, RED);  //small sphere to mark the center of the grid.
             EndMode3D(); //no longer drawing in the 3d world after this, but on the flat 2d screen
 
-            
-
-            DrawText("Projectile Sim, Posts every 25 meters", 10,10,20,DARKGRAY);  //text, 10, 10 = x y position from left and top edge
-            DrawText("Use arrow keys to aim, hold space to charge, release to fire", 10, 40, 20, DARKGRAY);
-            DrawText(TextFormat("Score: %d", score), 10, 70, 20, DARKGRAY);                                                                                     // Eric this is where the "Target Hit!" text would be.
+            DrawText("Projectile Sim", 10,10,20,DARKGRAY);  //text, 10, 10 = x y position from left and top edge
+            DrawText(TextFormat("Score: %d", score), 10, 40, 20, DARKGRAY);
+            if (turnCount == 0) {
+                DrawText("Use arrow keys to aim, hold space to charge, release to fire", 10, 70, 20, DARKGRAY);
+            }
             
             DrawWindHUD(ball.windAcceleration, screen_width);   // wind indicator, top-right                                                                         // 20 = font size 
             DrawPowerBar(cannon.getLaunchSpeed(), screen_width, screen_height);   // <-- add this

@@ -1,3 +1,4 @@
 sim
 projectile_sim
 *.o
+.DS_Store
