@@ -7,6 +7,7 @@ void Target::Draw() {
     Vector3 faceFront = { position.x - 0.1f, position.y, position.z };
     Vector3 faceBack  = { position.x + 0.1f, position.y, position.z };
     DrawCylinderEx(faceFront, faceBack, radius, radius, 24, color); //24 sides = smooth disk
+    DrawCylinderWiresEx(faceFront, faceBack, radius, radius, 24, BLACK);
 };
 
 void Target::Update(float dt) {
