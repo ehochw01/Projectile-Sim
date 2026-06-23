@@ -181,6 +181,8 @@ int main() {
 
     bool collision = false; //flag to indicate if the ball has hit the target, initially false
  //this is our mainloop, 
+
+    int score = 0; //initialize score to 0, will increment when target is hit
     while (!WindowShouldClose()) {    //will be true until we hit escape key, only way to end the sim!
         float fTime = GetFrameTime(); //seconds since last frame, in our case 1/60 secs, then uses this to feed the physics engine
 
@@ -222,6 +224,7 @@ int main() {
             spawnDebris(debris, ball.position); //spawn debris where the ball actually struck the disk
             collision = false; //reset collision flag to avoid repeated spawning
             randomizeTarget(target); //move the target to a new random location
+            score++; //increment score when target is hit
         }
 
         BeginDrawing();
@@ -243,8 +246,7 @@ int main() {
 
             DrawText("Projectile Sim, Posts every 25 meters", 10,10,20,DARKGRAY);  //text, 10, 10 = x y position from left and top edge
             DrawText("Use arrow keys to aim, hold space to charge, release to fire", 10, 40, 20, DARKGRAY);
-            DrawText("Score: ", 10, 70, 20, DARKGRAY);                                                                          // // DARKGRAY = color
-                                                                                     // Eric this is where the "Target Hit!" text would be.
+            DrawText(TextFormat("Score: %d", score), 10, 70, 20, DARKGRAY);                                                                                     // Eric this is where the "Target Hit!" text would be.
             
             DrawWindHUD(ball.windAcceleration, screen_width);   // wind indicator, top-right                                                                         // 20 = font size 
             DrawPowerBar(cannon.getLaunchSpeed(), screen_width, screen_height);   // <-- add this
