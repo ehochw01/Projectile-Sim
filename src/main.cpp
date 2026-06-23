@@ -210,6 +210,10 @@ void randomizeTarget(Target& target) {
     target.position = { x, y, z };
 }
 
+void centerTargetPosition(Target& target) {
+    target.position = { 50.0f, 15.0f, 0.0f }; // center of the lane
+}
+
 int main() {
     const int screen_width = 1280;   //screen dimensions, const since they shouldn't change
     const int screen_height = 720; 
@@ -235,7 +239,7 @@ int main() {
     ball.active = false; //dormant ball, not simulated until fired
 
     Target target; // target is a sphere, will be drawn at a random location in the world.
-    target.position = { 50.0f, 15.0f, 0.0f };
+    centerTargetPosition(target); // start the target in the center of the lane, not random yet
 
     ball.GenerateWind(); // generate wind for the first 3 shots
 
@@ -284,13 +288,20 @@ int main() {
             targetVisible = false;                                   // target "explodes" and disappears on impact
             targetRespawnTimer = Constants::TARGET_RESPAWN_DELAY;     // ...and stays gone for a short pause
             score++; //increment score when target is hit
+            if (turnCount % 3 == 0) {
+                target.RandomizeColor(); //change the color of the target to make it more visually interesting
+                target.Shrink(); 
+                centerTargetPosition(target); //center the target after shrinking
+            } else {
+                randomizeTarget(target);
+            }
+            
         }
 
         // once the pause elapses, move the target and bring it back
         if (!targetVisible) {
             targetRespawnTimer -= fTime;
             if (targetRespawnTimer <= 0.0f) {
-                randomizeTarget(target);
                 targetVisible = true;
             }
         }
