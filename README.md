@@ -1,8 +1,8 @@
 # Projectile Simulator
 
-[![Start screen — click to watch a gameplay video](images/day_screenshot.png)](https://youtu.be/zXgoBTlb0z8)
+[![Start screen — click to watch a gameplay video](images/day_screenshot.png)](https://youtu.be/aRADoMSwEZg)
 
-▶️ **[Watch a gameplay video on YouTube](https://youtu.be/zXgoBTlb0z8)**
+▶️ **[Watch a gameplay video on YouTube](https://youtu.be/aRADoMSwEZg)**
 
 ## How to install
 
@@ -60,13 +60,17 @@ That's it — Ready to Play! 🎉
 
 ## How to play
 
-Use your computer arrow keys (UP, DOWN, LEFT, RIGHT) to change the aim direction of the cannon.
+Use the arrow keys (UP, DOWN, LEFT, RIGHT) to change the aim direction of the cannon. Lefties can use the W, A, S, D keys which do the same.
 
 Hold the space bar to begin firing the cannon. The longer you hold the space bar, the more powerful the shot will be. Release the space bar to fire. 
 
 Aim for the bullseye targets on the screen. The more centered your hit, the more points you score. The outer ring is worth 1 point, climbing up to 5 points for a dead-center bullseye. Every 3rd hit, the target shrinks and changes color, making it progressively harder to hit. You have a total of 10 missed shots before the game is over. 
 
 Make sure to consider wind when aiming your shot. 
+
+For a change of scenery, toggle between day and night with the **Day/Night** button in the bottom-right corner, or by pressing the **N** key.
+
+![Night mode](images/night_screenshot.png)
 
 ## Live reload during development
 
