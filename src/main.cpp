@@ -555,7 +555,7 @@ int main() {
             bool dayNightHovered = CheckCollisionPointRec(GetMousePosition(), dayNightButton);
             DrawRectangleRec(dayNightButton, dayNightHovered ? LIGHTGRAY : GRAY);
             DrawRectangleLinesEx(dayNightButton, 2.0f, BLACK);
-            const char* dayNightText = isNight ? "Night" : "Day";
+            const char* dayNightText = isNight ? "Day" : "Night";
             int dayNightFontSize = 18;
             int dayNightTextWidth = MeasureText(dayNightText, dayNightFontSize);
             DrawText(dayNightText,
