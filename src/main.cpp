@@ -137,15 +137,16 @@ void DrawWorld(bool isNight) {
     DrawCylinder({160.0f, 0.0f, -25.0f}, 0.5f, 0.3f, 7.0f, 8, trunk);
     DrawSphere({160.0f, 8.8f, -25.0f}, 3.0f, leaves);
 
-    // tree shadows — dark discs on the ground, only during the day
+    // tree shadows — ellipses on the ground stretched away from the sun 
+    // shadows stretch toward -x and +z relative to the tree; DrawCube(center, width_x, height_y, depth_z)
     if (!isNight) {
         Color shadow = {0, 0, 0, 60};
-        DrawCylinder({30.0f,  0.02f, 25.0f},  3.5f, 3.5f, 0.01f, 10, shadow);
-        DrawCylinder({70.0f,  0.02f, -30.0f}, 4.5f, 4.5f, 0.01f, 10, shadow);
-        DrawCylinder({120.0f, 0.02f, 28.0f},  3.0f, 3.0f, 0.01f, 10, shadow);
-        DrawCylinder({45.0f,  0.02f, -35.0f}, 4.0f, 4.0f, 0.01f, 10, shadow);
-        DrawCylinder({90.0f,  0.02f, 32.0f},  5.0f, 5.0f, 0.01f, 10, shadow);
-        DrawCylinder({160.0f, 0.02f, -25.0f}, 3.5f, 3.5f, 0.01f, 10, shadow);
+        DrawCube({28.0f,  0.02f, 27.0f},  5.0f, 0.01f, 3.0f, shadow);   // tree at x=30,z=25
+        DrawCube({67.0f,  0.02f, -28.0f}, 7.0f, 0.01f, 3.5f, shadow);   // tree at x=70,z=-30
+        DrawCube({117.0f, 0.02f, 30.0f},  5.0f, 0.01f, 2.5f, shadow);   // tree at x=120,z=28
+        DrawCube({42.0f,  0.02f, -33.0f}, 6.0f, 0.01f, 3.0f, shadow);   // tree at x=45,z=-35
+        DrawCube({86.0f,  0.02f, 34.0f},  8.0f, 0.01f, 4.0f, shadow);   // tree at x=90,z=32
+        DrawCube({157.0f, 0.02f, -23.0f}, 6.0f, 0.01f, 3.0f, shadow);   // tree at x=160,z=-25
     }
 
     // boulders scattered off to the sides
@@ -286,8 +287,12 @@ int main() {
     InitWindow(screen_width,screen_height, "Projectile Simulator");
     SetTargetFPS(60); //sets the upper limit of the loop at 60 fps
 
-    // random time of day — decided once at startup, affects sky color, scenery colors, and stars
-    bool isNight = GetRandomValue(0, 1);
+    // day/night cycle: flips every 120 seconds with a 3-second fade-to-black transition
+    bool isNight = 0;    // starting time of day
+    float dayNightTimer = 0.0f;             // counts up to CYCLE_DURATION then triggers transition
+    float transitionTimer = -1.0f;          // -1 = not transitioning; 0..3 = fading
+    const float CYCLE_DURATION = 120.0f;    // seconds between transitions
+    const float FADE_DURATION = 2.0f;       // total fade time (half in, half out)
 
     // pre-generate stars for the night sky (only drawn when isNight is true)
     const int STAR_COUNT = 200;
@@ -343,7 +348,24 @@ int main() {
     int hitPopupValue = 0;                       // the ring value to show in that popup
 
     while (!WindowShouldClose()) {    // will be true until we hit escape key 
-        float fTime = GetFrameTime(); // seconds since last frame, in our case 1/60 secs, then uses this to feed the physics engine
+        float fTime = GetFrameTime();
+
+        // day/night cycle timer
+        if (transitionTimer < 0.0f) {
+            dayNightTimer += fTime;
+            if (dayNightTimer >= CYCLE_DURATION) {
+                dayNightTimer = 0.0f;
+                transitionTimer = 0.0f;   // start the fade
+            }
+        } else {
+            transitionTimer += fTime;
+            if (transitionTimer >= FADE_DURATION / 2.0f && transitionTimer - fTime < FADE_DURATION / 2.0f) {
+                isNight = !isNight;       // flip at the midpoint (screen is fully black)
+            }
+            if (transitionTimer >= FADE_DURATION) {
+                transitionTimer = -1.0f;  // transition done
+            }
+        }
 
         if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W))    cannon.incrElevation(fTime);
         if (IsKeyDown(KEY_LEFT) ||IsKeyDown(KEY_A))  cannon.decrAzimuth(fTime);
@@ -467,9 +489,20 @@ int main() {
             
             DrawWindHUD(ball.windAcceleration, screen_width, isNight);
             DrawPowerBar(cannon.getLaunchSpeed(), screen_width, screen_height, isNight);
-                                                                        
 
-        EndDrawing();  //pushes frame to screen 
+            // fade-to-black overlay during day/night transition
+            if (transitionTimer >= 0.0f) {
+                float halfFade = FADE_DURATION / 2.0f;
+                float fadeAlpha;
+                if (transitionTimer < halfFade) {
+                    fadeAlpha = transitionTimer / halfFade;          // 0 -> 1 (fade to black)
+                } else {
+                    fadeAlpha = 1.0f - (transitionTimer - halfFade) / halfFade;  // 1 -> 0 (fade back)
+                }
+                DrawRectangle(0, 0, screen_width, screen_height, (Color){0, 0, 0, (unsigned char)(fadeAlpha * 255)});
+            }
+
+        EndDrawing();  //pushes frame to screen
     } //closes the while loop
 CloseWindow();
 return 0;
