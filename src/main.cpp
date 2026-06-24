@@ -207,6 +207,14 @@ void spawnDebris(std::vector<Debris>& debris, Vector3 origin, Color tColor) { //
         };
         debris.push_back(piece); // didn't have this at first and it didnt work, this is what adds the finished fragment to the original vector
     }
+
+    // cap total debris so the vector can't grow forever across a session. without this,
+    // every hit adds pieces that are updated + drawn each frame, so frame time keeps climbing
+    // and the per-frame audio refill (UpdateMusicStream) falls behind, causing the music to stutter.
+    // drop the oldest pieces first since they've already had the most time to be seen / settle.
+    if ((int)debris.size() > Constants::MAX_DEBRIS) {
+        debris.erase(debris.begin(), debris.begin() + (debris.size() - Constants::MAX_DEBRIS));
+    }
 }
 
 // pick a fresh random spot for the target somewhere downrange
@@ -237,6 +245,11 @@ int main() {
     SetConfigFlags(FLAG_WINDOW_TOPMOST);  // forces window to the front on launch
     InitWindow(screen_width,screen_height, "Projectile Simulator");
     SetTargetFPS(60); //sets the upper limit of the loop at 60 fps
+
+    InitAudioDevice();   // must come before loading/playing any audio
+    Music music = LoadMusicStream("music/8bit_music.mp3");   // streamed from disk, not loaded all at once
+    music.looping = true;                                    // loop the background track forever
+    PlayMusicStream(music);
 
     int turnCount = 0; //keeps track of how many shots have been fired, used to change wind every 3 shots
     int hitCount = 0;  //keeps track of how many hits the player has scored, used to change target color and size every 3 hits
@@ -276,8 +289,22 @@ int main() {
 
     bool missCounted = false;   // true once the current shot has been tallied as a miss, so we only count it once while the ball flies on
 
+    bool muted = false;   // music on/off, toggled by the mute button in the bottom-right
+    // mute button rectangle, anchored to the bottom-right corner
+    Rectangle muteButton = { (float)screen_width - 100.0f, (float)screen_height - 50.0f, 90.0f, 35.0f };
+
     while (!WindowShouldClose()) {    // will be true until we hit escape key
         float fTime = GetFrameTime(); // seconds since last frame, in our case 1/60 secs, then uses this to feed the physics engine
+
+        UpdateMusicStream(music);   // keeps the streamed audio buffer fed each frame
+
+        // mute toggle: clicking the button flips muted and drops/restores the volume.
+        // handled here (outside the gameplay block) so it still works on the game over screen.
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+            CheckCollisionPointRec(GetMousePosition(), muteButton)) {
+            muted = !muted;
+            SetMusicVolume(music, muted ? 0.0f : 1.0f);
+        }
 
         bool gameOver = missesLeft <= 0;   // out of misses: freeze gameplay and show the overlay below
 
@@ -401,8 +428,23 @@ int main() {
                 DrawText(finalScoreText, screen_width / 2 - scoreWidth / 2, screen_height / 2 + 20, scoreFontSize, RAYWHITE);
             }
 
+            // mute button, drawn last so it stays visible/clickable even over the game over overlay.
+            // highlights when hovered so it reads as a button.
+            bool muteHovered = CheckCollisionPointRec(GetMousePosition(), muteButton);
+            DrawRectangleRec(muteButton, muteHovered ? LIGHTGRAY : GRAY);
+            DrawRectangleLinesEx(muteButton, 2.0f, BLACK);
+            const char* muteText = muted ? "Unmute" : "Mute";
+            int muteFontSize = 18;
+            int muteTextWidth = MeasureText(muteText, muteFontSize);
+            DrawText(muteText,
+                     (int)(muteButton.x + muteButton.width / 2 - muteTextWidth / 2),
+                     (int)(muteButton.y + muteButton.height / 2 - muteFontSize / 2),
+                     muteFontSize, BLACK);
+
         EndDrawing();  //pushes frame to screen
     } //closes the while loop
+UnloadMusicStream(music);   // free the audio stream before tearing down the device
+CloseAudioDevice();
 CloseWindow();
 return 0;
 }
