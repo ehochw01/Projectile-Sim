@@ -1,6 +1,6 @@
 # Projectile Simulator
 
-[![Start screen — click to watch a gameplay video](images/start_screen.png)](https://youtu.be/zXgoBTlb0z8)
+[![Start screen — click to watch a gameplay video](images/day_screenshot.png)](https://youtu.be/zXgoBTlb0z8)
 
 ▶️ **[Watch a gameplay video on YouTube](https://youtu.be/zXgoBTlb0z8)**
 
