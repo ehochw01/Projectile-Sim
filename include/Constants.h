@@ -12,5 +12,5 @@ namespace Constants {
     inline constexpr int MAX_DEBRIS = 300;   // cap on total debris pieces alive at once, oldest get dropped past this
     inline constexpr float TARGET_RESPAWN_DELAY = 1.2f;   // seconds the target stays gone after being hit, before reappearing elsewhere
     inline constexpr int DEBRIS_COLOR_VARIATION = 20;
-    inline constexpr int MISSES_ALLOWED = 1; // maximum number of misses allowed before game over
+    inline constexpr int MISSES_ALLOWED = 10; // maximum number of misses allowed before game over
 }
