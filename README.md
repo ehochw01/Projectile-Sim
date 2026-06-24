@@ -4,13 +4,57 @@
 
 ## How to install
 
-First install raylib: 
+Pick the section for your operating system. The same `make` command builds the game on MacOS and Windows.
+
+### macOS
+
+These steps use [Homebrew](https://brew.sh), a package manager for macOS. If you don't already have it, install it by pasting this into your terminal and following the prompts:
+
+```/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"```
+
+**1. Get the code.** If you don't have git, install it first with `brew install git`. Then download the code and move into the project folder:
+
+```
+git clone https://github.com/ehochw01/Projectile-Sim.git
+cd Projectile-Sim
+```
+
+**2. Install raylib:**
 
 ```brew install raylib```
 
-To compile and run:
+**3. Compile and run:**
 
 ```make && ./sim```
+
+That's it — Ready to Play! 🎉
+
+> **Linux:** the Makefile builds on Linux too — install raylib via your package manager (e.g. `sudo apt install libraylib-dev`), then `make && ./sim`.
+
+### Windows
+
+The easiest setup on Windows is [w64devkit](https://github.com/skeeto/w64devkit/releases), which bundles `g++`, `make`, and git in one download.
+
+**1. Install w64devkit.** Download the latest release, unzip it, and run `w64devkit.exe` to open its terminal. Run all the commands below inside that terminal.
+
+**2. Get the code:**
+
+```
+git clone https://github.com/ehochw01/Projectile-Sim.git
+cd Projectile-Sim
+```
+
+**3. Install raylib.** Download the raylib Windows release from the [raylib releases page](https://github.com/raysan5/raylib/releases) (pick the `mingw-w64` build) and unzip it, for example to `C:\raylib\raylib`.
+
+**4. Compile and run.** The Makefile expects raylib at `C:/raylib/raylib`. If you put it there, just run:
+
+```make && sim.exe```
+
+If you unzipped it somewhere else, point the build at it:
+
+```make RAYLIB_PATH=C:/your/path/to/raylib && sim.exe```
+
+That's it — Ready to Play! 🎉
 
 ## How to play
 
