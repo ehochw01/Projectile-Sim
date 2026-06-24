@@ -221,8 +221,8 @@ void DrawWorld(bool isNight) {
         DrawSphere({246.0f, 82.0f, 133.0f}, 6.0f, cloudBot);
         DrawSphere({243.0f, 86.0f, 131.0f}, 5.0f, cloudTop);
     } else {
-        // pale moon low in the sky
-        DrawSphere({150.0f, 70.0f, -120.0f}, 12.0f, (Color){240, 240, 220, 255});
+        // pale moon low in the sky (y nudged down so it clears the on-screen instruction text)
+        DrawSphere({150.0f, 65.0f, -120.0f}, 12.0f, (Color){240, 240, 220, 255});
     }
 }
 
@@ -384,10 +384,12 @@ int main() {
             SetMusicVolume(music, muted ? 0.0f : 1.0f);
         }
 
-        // day/night toggle: clicking the button flips between day and night mode.
-        // also outside the gameplay block so it works on the game over screen too.
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
-            CheckCollisionPointRec(GetMousePosition(), dayNightButton)) {
+        /* day/night toggle: clicking the button or pressing N flips between day and night mode.
+           also outside the gameplay block so it works on the game over screen too.
+           IsKeyPressed fires once per press (not every frame held), so N flips exactly once. */
+        bool dayNightClicked = IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+                               CheckCollisionPointRec(GetMousePosition(), dayNightButton);
+        if (dayNightClicked || IsKeyPressed(KEY_N)) {
             isNight = !isNight;
         }
 
@@ -511,7 +513,7 @@ int main() {
             }
             // show instructions only before the first shot, then hide them to reduce clutter
             if (turnCount == 0) { 
-                DrawText("Use arrow keys to aim, hold space to charge, release to fire", 10, 70, 20, DARKGRAY);
+                DrawText("Use arrow keys to aim, hold space to charge, release to fire", 10, 70, 20, isNight ? WHITE : DARKGRAY);
             }
 
             // label stays black; only the number changes color based on missesLeft
