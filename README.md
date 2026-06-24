@@ -1,4 +1,6 @@
-# Cannon Ball
+# Projectile Simulator
+
+![Start screen](images/start_screen.png)
 
 ## How to install
 
@@ -9,6 +11,16 @@ First install raylib:
 To compile and run:
 
 ```make && ./sim```
+
+## How to play
+
+Use your computer arrow keys (UP, DOWN, LEFT, RIGHT) to change the aim direction of the cannon.
+
+Hold the space bar to begin firing the cannon. The longer you hold the space bar, the more powerful the shot will be. Release the space bar to fire. 
+
+Aim for the targets on the screen. Each hit scores a point. After being struck, a target briefly disappears before reappearing at a new spot — and every 3rd hit, it also shrinks and changes color, making it progressively harder to hit.
+
+Make sure to consider wind when aiming your shot. 
 
 ## Live reload during development
 
@@ -25,20 +37,8 @@ Then run:
 This watches all files in `src/` and `include/`. Whenever you save a change, the running sim closes, only the changed files recompile, and the sim relaunches. Press `Ctrl-C` to stop watching.
 
 Notes:
-- If a build fails, the old sim won't relaunch. The compiler error shows in the terminal and the watcher keeps waiting for your next save.
+- If a build fails, the old sim won't relaunch — the compiler error shows in the terminal and the watcher keeps waiting for your next save.
 - If you *add* a brand-new source file, restart `make watch` so it picks up the new file (and remember to add it to `SRCS` in the Makefile).
-
-## How to play
-
-Use your computer arrow keys (UP, DOWN, LEFT, RIGHT) to change the aim direction of the cannon.
-
-Hold the space bar to begin firing the cannon. The longer you hold the space bar, the more powerful the shot will be. Release the space bar to fire. 
-
-Aim for the bullseye targets on the screen. Each target is a set of concentric rings, and the more centered your hit, the more points you score: the outer ring is worth 1 point, climbing up to 5 points for a dead-center bullseye. After being struck, a target briefly disappears before reappearing at a new spot, and every 3rd hit, it also shrinks and changes color, making it progressively harder to hit.
-
-You start with a limited number of misses (shown as "Misses Left" at the bottom of the screen). A shot counts as a miss if it sails past the target or is too weak to ever reach it. When you run out of misses, the game ends and a Game Over screen displays your final score.
-
-Make sure to consider wind when aiming your shot. 
 
 ## Folder structure
 
@@ -64,7 +64,7 @@ The ```Projectile``` class implements the draw method of entity. It represents t
 
 The ```Debris``` class also inherits from ```PhysicsBody```, so it reuses the same gravity and bounce physics for free (it only implements ```Draw()```). Debris are the colored fragments that erupt from a target when it is struck.
 
-The ```Target``` class inherits directly from ```Entity``` (it is static, so it does not need ```PhysicsBody```). It is drawn as a flat vertical disk facing the cannon using raylib's ```DrawCylinderEx()``` method. Its ```CheckHit()``` method detects a collision by testing whether the ball crossed the disk's plane within the disk's face on a given frame. This fires exactly once per pass-through, instead of repeatedly while the ball overlaps a solid volume.
+The ```Target``` class inherits directly from ```Entity``` (it is static, so it does not need ```PhysicsBody```). It is drawn as a flat vertical disk facing the cannon using raylib's ```DrawCylinderEx()``` method. Its ```CheckHit()``` method detects a collision by testing whether the ball crossed the disk's plane within the disk's face on a given frame — this fires exactly once per pass-through, instead of repeatedly while the ball overlaps a solid volume.
 
 Then there is the ```Cannon``` class which does NOT inherit from the ```Entity``` class as it is not subject to gravity or wind for it's movement. Only user input can move the cannon, changing its aim direction. The ```Cannon.Fire()``` method takes a ```Projectile``` object by reference, and then affects it's physics metrics. 
 
