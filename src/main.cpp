@@ -345,10 +345,11 @@ int main() {
     while (!WindowShouldClose()) {    // will be true until we hit escape key 
         float fTime = GetFrameTime(); // seconds since last frame, in our case 1/60 secs, then uses this to feed the physics engine
 
-        if (IsKeyDown(KEY_LEFT))  cannon.decrAzimuth(fTime);
-        if (IsKeyDown(KEY_RIGHT)) cannon.incrAzimuth(fTime);
-        if (IsKeyDown(KEY_UP))    cannon.incrElevation(fTime);
-        if (IsKeyDown(KEY_DOWN))  cannon.decrElevation(fTime);
+        if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W))    cannon.incrElevation(fTime);
+        if (IsKeyDown(KEY_LEFT) ||IsKeyDown(KEY_A))  cannon.decrAzimuth(fTime);
+        if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S))  cannon.decrElevation(fTime);
+        if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) cannon.incrAzimuth(fTime);
+
         // charge while holding space
         if (IsKeyDown(KEY_SPACE)) {
             cannon.incrLaunchSpeed(fTime);
