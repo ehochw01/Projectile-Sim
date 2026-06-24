@@ -395,10 +395,10 @@ int main() {
 
         // all aiming, firing, and physics are frozen once the game is over
         if (!gameOver) {
-            if (IsKeyDown(KEY_UP || IsKeyDown(KEY_W)))    cannon.incrElevation(fTime);
-            if (IsKeyDown(KEY_LEFT || IsKeyDown(KEY_A)))  cannon.decrAzimuth(fTime);
-            if (IsKeyDown(KEY_DOWN || IsKeyDown(KEY_S)))  cannon.decrElevation(fTime);
-            if (IsKeyDown(KEY_RIGHT || IsKeyDown(KEY_D))) cannon.incrAzimuth(fTime);
+            if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W))    cannon.incrElevation(fTime);
+            if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A))  cannon.decrAzimuth(fTime);
+            if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S))  cannon.decrElevation(fTime);
+            if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) cannon.incrAzimuth(fTime);
             // charge while holding space
             if (IsKeyDown(KEY_SPACE)) {
                 cannon.incrLaunchSpeed(fTime);
