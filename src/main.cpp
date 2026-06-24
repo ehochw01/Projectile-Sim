@@ -284,9 +284,9 @@ void centerTargetPosition(Target& target) {
     target.position = { 50.0f, 15.0f, 0.0f }; // center of the lane
 }
 
-Color getMissedLeftColor(int missesLeft) {
+Color getMissedLeftColor(int missesLeft, bool isNight) {
     if (missesLeft > 5) {
-        return BLACK;
+        return isNight ? WHITE : BLACK;
     } else if (missesLeft > 2) {
         return BEIGE;
     } else {
@@ -516,9 +516,9 @@ int main() {
 
             // label stays black; only the number changes color based on missesLeft
             const char* missesLabel = "Misses Left: ";
-            DrawText(missesLabel, 10, 680, 20, BLACK);
+            DrawText(missesLabel, 10, 680, 20, isNight ? WHITE : BLACK);
             int missesLabelWidth = MeasureText(missesLabel, 20);
-            DrawText(TextFormat("%d", missesLeft), 10 + missesLabelWidth, 680, 20, getMissedLeftColor(missesLeft));
+            DrawText(TextFormat("%d", missesLeft), 10 + missesLabelWidth, 680, 20, getMissedLeftColor(missesLeft, isNight));
             
             DrawWindHUD(ball.windAcceleration, screen_width, isNight);
             DrawPowerBar(cannon.getLaunchSpeed(), screen_width, screen_height, isNight);
