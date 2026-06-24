@@ -48,11 +48,11 @@ cd Projectile-Sim
 
 **4. Compile and run.** The Makefile expects raylib at `C:/raylib/raylib`. If you put it there, just run:
 
-```make && sim.exe```
+```make && ./sim.exe```
 
 If you unzipped it somewhere else, point the build at it:
 
-```make RAYLIB_PATH=C:/your/path/to/raylib && sim.exe```
+```make RAYLIB_PATH=C:/your/path/to/raylib && ./sim.exe```
 
 That's it — Ready to Play! 🎉
 

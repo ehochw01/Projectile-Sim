@@ -247,7 +247,8 @@ int main() {
     SetTargetFPS(60); //sets the upper limit of the loop at 60 fps
 
     InitAudioDevice();   // must come before loading/playing any audio
-    Music music = LoadMusicStream("music/8bit_music.mp3");   // streamed from disk, not loaded all at once
+    SetAudioStreamBufferSizeDefault(8192);   // larger buffer than the default so a brief frame spike can't starve the stream (stutter)
+    Music music = LoadMusicStream("music/8bit_music.ogg");   // streamed from disk, not loaded all at once. ogg loops more seamlessly than mp3
     music.looping = true;                                    // loop the background track forever
     PlayMusicStream(music);
 
