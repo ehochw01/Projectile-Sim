@@ -229,6 +229,8 @@ int main() {
     SetTargetFPS(60); //sets the upper limit of the loop at 60 fps
 
     int turnCount = 0; //keeps track of how many shots have been fired, used to change wind every 3 shots
+    int hitCount = 0;  //keeps track of how many hits the player has scored, used to change target color and size every 3 hits
+    int missCount = 0; //keeps track of how many misses the player has left, game over when it reaches 0
 
     // sets up the camera, behind the cannon looking fwd
     Camera3D camera = {};
@@ -252,11 +254,15 @@ int main() {
 
     std::vector<Debris> debris; // vector to hold debris objects, will be filled when target is hit
 
+    int hitValue = 0;     //0 = no hit, 1 = outer ring ... 5 = bullseye, from Target::CheckHit
     bool collision = false; //flag to indicate if the ball has hit the target, initially false
     int score = 0; //initialize score to 0, will increment when target is hit
 
     bool targetVisible = true;          // hidden briefly after a hit while it "respawns" elsewhere
     float targetRespawnTimer = 0.0f;    // counts down from Constants::TARGET_RESPAWN_DELAY while hidden
+
+    Vector3 hitPopupPos = {0.0f, 0.0f, 0.0f};   // where the target was when it was last hit, for the "+N" popup
+    int hitPopupValue = 0;                       // the ring value to show in that popup
 
     while (!WindowShouldClose()) {    // will be true until we hit escape key 
         float fTime = GetFrameTime(); // seconds since last frame, in our case 1/60 secs, then uses this to feed the physics engine
@@ -274,34 +280,38 @@ int main() {
             cannon.Fire(ball);
             ball.active = true;
             turnCount++;
-            if (turnCount % 3 == 0) { ball.GenerateWind(); }
-
         }
 
         Vector3 prevBallPos = ball.position;   // remember where the ball was before integrating this frame
         if (ball.active) ball.Update(fTime);   // only simulate a ball in flight
 
-        // disk hit test: true only on the frame the ball crosses the target's face (no repeated hits)
+        // disk hit test: only checked on the frame the ball crosses the target's face (no repeated hits)
         // skipped while the target is hidden/respawning so the ball can't hit something that isn't there
-        collision = targetVisible && ball.active && target.CheckHit(prevBallPos, ball.position, ball.radius);
+        hitValue = (targetVisible && ball.active) ? target.CheckHit(prevBallPos, ball.position, ball.radius) : 0;
+        collision = hitValue > 0;
 
         for (Debris& piece : debris) {
             piece.Update(fTime);   // gravity + bounce, all inherited
         }
 
         if (collision) {
+            hitCount++;
             spawnDebris(debris, ball.position, target.GetColor()); //spawn debris where the ball actually struck the disk
             collision = false; //reset collision flag to avoid repeated spawning
             ball.active = false; //stop simulating/drawing the ball now that it's struck something
             targetVisible = false;                                   // target "explodes" and disappears on impact
             targetRespawnTimer = Constants::TARGET_RESPAWN_DELAY;     // ...and stays gone for a short pause
-            score++; //increment score when target is hit
-            if (turnCount % 3 == 0) {
+            hitPopupPos = target.position;   // remember where it was hit, before it moves/shrinks below
+            hitPopupValue = hitValue;
+            score += hitValue; //add the ring value (1 = outer ring ... 5 = bullseye)
+            if (hitCount % 3 == 0) {
                 target.ChangeColor(); //change the color of the target to make it more visually interesting
                 target.Shrink(); 
+                ball.GenerateWind(); //generate new wind every 3 shots, so the player has to adjust their aim
                 centerTargetPosition(target); //center the target after shrinking
             } else {
                 randomizeTarget(target);
+                missCount++; //increment the number of misses, if the player misses the target
             }
             
         }
@@ -331,9 +341,21 @@ int main() {
 
             DrawText("Projectile Sim", 10,10,20,DARKGRAY);  //text, 10, 10 = x y position from left and top edge
             DrawText(TextFormat("Score: %d", score), 10, 40, 20, DARKGRAY);
+
+            // "+N" popup floats above where the target was hit, for as long as it's gone (TARGET_RESPAWN_DELAY)
+            if (!targetVisible) {
+                Vector3 popupWorldPos = { hitPopupPos.x, hitPopupPos.y + target.radius /3, hitPopupPos.z };
+                Vector2 popupScreenPos = GetWorldToScreen(popupWorldPos, camera);
+                const char* popupText = TextFormat("+%d", hitPopupValue);
+                int popupFontSize = 30;
+                int popupTextWidth = MeasureText(popupText, popupFontSize);
+                DrawText(popupText, (int)popupScreenPos.x - popupTextWidth / 2, (int)popupScreenPos.y, popupFontSize, BLACK);
+            }
             if (turnCount == 0) {
                 DrawText("Use arrow keys to aim, hold space to charge, release to fire", 10, 70, 20, DARKGRAY);
             }
+
+            DrawText("Misses Left: ", 10,680,20,BLACK);  //text, 10, 10 = x y position from left and top edge
             
             DrawWindHUD(ball.windAcceleration, screen_width);   // wind indicator, top-right                                                                         // 20 = font size 
             DrawPowerBar(cannon.getLaunchSpeed(), screen_width, screen_height);   // <-- add this
